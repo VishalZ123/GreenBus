@@ -99,7 +99,7 @@ def create_buses(request):
     eta = request.data.get('eta')
     
     # Validate that all required fields are provided
-    if not bus_name or not total_seats or not current_occupancy or not available_days or not route_id or not fare or not eta:
+    if not bus_name or not total_seats or not current_occupancy or not available_days or not route_id or not fare:
         return Response({'error': 'bus_name, total_seats, current_occupancy, available_days, route_id, fare and eta must be provided'}, status=400)
     
     # get route with the route id
@@ -109,8 +109,12 @@ def create_buses(request):
         return Response({'error': 'Route not found'}, status=404)
     
     # create a new bus
-    bus = Bus.objects.create(bus_name=bus_name, total_seats=total_seats, current_occupancy=current_occupancy,\
+    if eta:
+        bus = Bus.objects.create(bus_name=bus_name, total_seats=total_seats, current_occupancy=current_occupancy,\
         available_days=available_days, route=route, fare=fare, eta=eta)
+    else:
+        bus = Bus.objects.create(bus_name=bus_name, total_seats=total_seats, current_occupancy=current_occupancy,\
+            available_days=available_days, route=route, fare=fare)
     
     # Serialize the queryset
     serializer = BusSerializer(bus)
@@ -144,7 +148,7 @@ def update_bus(request):
     
     # Validate that all required fields are provided
     if not bus_id or not bus_name or not total_seats or not current_occupancy or \
-        not available_days or not route_id or not fare or not eta:
+        not available_days or not route_id or not fare:
         return Response({'error': 'bus_id, bus_name, total_seats, current_occupancy, \
             available_days, route_id, fare and eta must be provided'}, status=400)
     
@@ -167,7 +171,8 @@ def update_bus(request):
     bus.available_days = available_days
     bus.route = route
     bus.fare = fare
-    bus.eta = eta
+    if eta:
+        bus.eta = eta
     bus.save()
     
     # Serialize the queryset

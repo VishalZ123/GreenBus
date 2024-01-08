@@ -35,3 +35,12 @@ def user_login(request):
         serializer = UserProfileSerializer(user_profile)
         return Response(serializer.data)
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+###################################################################################
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes((AllowAny,))
+def get_all_users(request):
+    users = UserProfile.objects.all()
+    serializer = UserProfileSerializer(users, many=True)
+    return Response(serializer.data)
